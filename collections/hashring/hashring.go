@@ -108,17 +108,17 @@ func (h *HashRing) generateCircle() {
 	sort.Sort(HashKeyOrder(h.sortedKeys))
 }
 
-func (h *HashRing) GetNode(stringKey string) (node string, ok bool) {
-	pos, ok := h.GetNodePos(stringKey)
-	if !ok {
-		return "", false
+func (h *HashRing) GetNode(stringKey string) (node string, err error) {
+	pos, err := h.GetNodePos(stringKey)
+	if err != nil {
+		return "", err
 	}
-	return h.ring[h.sortedKeys[pos]], true
+	return h.ring[h.sortedKeys[pos]], nil
 }
 
-func (h *HashRing) GetNodePos(stringKey string) (pos int, ok bool) {
+func (h *HashRing) GetNodePos(stringKey string) (pos int, err error) {
 	if len(h.ring) == 0 {
-		return 0, false
+		return 0, ErrNotEnoughNodes
 	}
 
 	key := h.GenKey(stringKey)
@@ -128,9 +128,9 @@ func (h *HashRing) GetNodePos(stringKey string) (pos int, ok bool) {
 
 	if pos == len(nodes) {
 		// Wrap the search, should return first node
-		return 0, true
+		return 0, nil
 	} else {
-		return pos, true
+		return pos, nil
 	}
 }
 
@@ -139,14 +139,14 @@ func (h *HashRing) GenKey(key string) HashKey {
 	return hashVal(bKey[0:4])
 }
 
-func (h *HashRing) GetNodes(stringKey string, size int) (nodes []string, ok bool) {
-	pos, ok := h.GetNodePos(stringKey)
-	if !ok {
-		return []string{}, false
+func (h *HashRing) GetNodes(stringKey string, size int) (nodes []string, err error) {
+	pos, err := h.GetNodePos(stringKey)
+	if err != nil {
+		return []string{}, err
 	}
 
 	if size > len(h.nodes) {
-		return []string{}, false
+		return []string{}, ErrNotEnoughNodes
 	}
 
 	returnedValues := make(map[string]bool, size)
@@ -165,7 +165,11 @@ func (h *HashRing) GetNodes(stringKey string, size int) (nodes []string, ok bool
 		}
 	}
 
-	return resultSlice, len(resultSlice) == size
+	if len(resultSlice) == size {
+		return resultSlice, nil
+	} else {
+		return resultSlice, ErrNotEnoughNodes
+	}
 }
 
 func (h *HashRing) AddNode(node string) *HashRing {

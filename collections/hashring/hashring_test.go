@@ -6,16 +6,16 @@ import (
 )
 
 func expectNode(t *testing.T, hashRing *HashRing, key string, expectedNode string) {
-	node, ok := hashRing.GetNode(key)
-	if !ok || node != expectedNode {
+	node, err := hashRing.GetNode(key)
+	if err != nil || node != expectedNode {
 		t.Error("GetNode(", key, ") expected", expectedNode, "but got", node)
 	}
 }
 
 func expectNodes(t *testing.T, hashRing *HashRing, key string, expectedNodes []string) {
-	nodes, ok := hashRing.GetNodes(key, 2)
+	nodes, err := hashRing.GetNodes(key, 2)
 	sliceEquality := reflect.DeepEqual(nodes, expectedNodes)
-	if !ok || !sliceEquality {
+	if err != nil || !sliceEquality {
 		t.Error("GetNodes(", key, ") expected", expectedNodes, "but got", nodes)
 	}
 }
@@ -62,14 +62,14 @@ func TestNewEmpty(t *testing.T) {
 	nodes := []string{}
 	hashRing := New(nodes)
 
-	node, ok := hashRing.GetNode("test")
-	if ok || node != "" {
-		t.Error("GetNode(test) expected (\"\", false) but got (", node, ",", ok, ")")
+	node, err := hashRing.GetNode("test")
+	if err == nil || node != "" {
+		t.Error("GetNode(test) expected (\"\", false) but got (", node, ",", err, ")")
 	}
 
-	nodes, rok := hashRing.GetNodes("test", 2)
-	if rok || !(len(nodes) == 0) {
-		t.Error("GetNode(test) expected ( [], false ) but got (", nodes, ",", rok, ")")
+	nodes, rerr := hashRing.GetNodes("test", 2)
+	if rerr == nil || !(len(nodes) == 0) {
+		t.Error("GetNode(test) expected ( [], false ) but got (", nodes, ",", rerr, ")")
 	}
 }
 
@@ -77,9 +77,9 @@ func TestForMoreNodes(t *testing.T) {
 	nodes := []string{"a", "b", "c"}
 	hashRing := New(nodes)
 
-	nodes, ok := hashRing.GetNodes("test", 5)
-	if ok || !(len(nodes) == 0) {
-		t.Error("GetNode(test) expected ( [], false ) but got (", nodes, ",", ok, ")")
+	nodes, err := hashRing.GetNodes("test", 5)
+	if err == nil || !(len(nodes) == 0) {
+		t.Error("GetNode(test) expected ( [], false ) but got (", nodes, ",", err, ")")
 	}
 }
 
@@ -87,9 +87,9 @@ func TestForEqualNodes(t *testing.T) {
 	nodes := []string{"a", "b", "c"}
 	hashRing := New(nodes)
 
-	nodes, ok := hashRing.GetNodes("test", 3)
-	if !ok && (len(nodes) == 3) {
-		t.Error("GetNode(test) expected ( [a b c], true ) but got (", nodes, ",", ok, ")")
+	nodes, err := hashRing.GetNodes("test", 3)
+	if err != nil && (len(nodes) == 3) {
+		t.Error("GetNode(test) expected ( [a b c], true ) but got (", nodes, ",", err, ")")
 	}
 }
 
