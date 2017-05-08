@@ -10,7 +10,7 @@
 /**
  * 
  *
- * @file log.go
+ * @file logrus.go
  * @author Menglong TAN <tanmenglong@gmail.com>
  * @date Mon May  8 15:39:03 2017
  *
@@ -19,8 +19,7 @@
 package log
 
 import (
-	"github.com/crackcell/nusadua/config"
-	log "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 	"os"
 )
 
@@ -28,39 +27,39 @@ import (
 // Public APIs
 //===================================================================
 
-func Init() (err error) {
-	log.SetFormatter(&log.JSONFormatter{})
-	lvl, err := log.ParseLevel(config.GlobalConfig.LogLevel)
+func Init(loglevel string) (err error) {
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+	lvl, err := logrus.ParseLevel(loglevel)
 	if err != nil {
-		lvl = log.InfoLevel
+		lvl = logrus.InfoLevel
 	}
-	log.SetLevel(lvl)
-	log.SetOutput(os.Stdout)
+	logrus.SetLevel(lvl)
+	logrus.SetOutput(os.Stdout)
 	return nil
 }
 
 func Debugf(format string, v ...interface{}) {
-	log.Debugf(format, v...)
+	logrus.Debugf(format, v...)
 }
 
 func Infof(format string, v ...interface{}) {
-	log.Infof(format, v...)
+	logrus.Infof(format, v...)
 }
 
 func Warnf(format string, v ...interface{}) {
-	log.Warnf(format, v...)
+	logrus.Warnf(format, v...)
 }
 
 func Errorf(format string, v ...interface{}) {
-	log.Errorf(format, v...)
+	logrus.Errorf(format, v...)
 }
 
 func Panicf(format string, v ...interface{}) {
-	log.Panicf(format, v...)
+	logrus.Panicf(format, v...)
 }
 
 func Fatalf(format string, v ...interface{}) {
-	log.Fatalf(format, v...)
+	logrus.Fatalf(format, v...)
 }
 
 //===================================================================
