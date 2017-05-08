@@ -22,34 +22,34 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"syscall"
 )
 
 //===================================================================
 // Public APIs
 //===================================================================
 
-const (
-	SIGINT  = syscall.SIGINT
-	SIGUSR1 = syscall.SIGUSR1
-	SIGUSR2 = syscall.SIGUSR2
-	SIGTERM = syscall.SIGTERM
-)
-
 type SignalHandler func(s os.Signal, arg interface{})
 
-type SignalHandlerSet struct {
-	ok bool
+type SignalHandlerSet interface {
+	Start()
+	Register(s os.Signal, h SignalHandler)
+}
+
+type signalHandlerSet struct {
 	m  map[os.Signal]SignalHandler
 }
 
-func (this *SignalHandlerSet) Register(s os.Signal, h SignalHandler) {
-	this.init()
-	this.m[s] = h
+func NewSignalHandlerSet() SignalHandlerSet {
+	return &signalHandlerSet{
+		m: make(map[os.Signal]SignalHandler),
+	}
 }
 
-func (this *SignalHandlerSet) Start() {
-	this.init()
+//===================================================================
+// Private
+//===================================================================
+
+func (this *signalHandlerSet) Start() {
 	go func() {
 		for {
 			c := make(chan os.Signal)
@@ -68,18 +68,11 @@ func (this *SignalHandlerSet) Start() {
 	}()
 }
 
-//===================================================================
-// Private
-//===================================================================
-
-func (this *SignalHandlerSet) init() {
-	if !this.ok {
-		this.m = make(map[os.Signal]SignalHandler)
-		this.ok = true
-	}
+func (this *signalHandlerSet) Register(s os.Signal, h SignalHandler) {
+	this.m[s] = h
 }
 
-func (this *SignalHandlerSet) handle(s os.Signal, arg interface{}) error {
+func (this *signalHandlerSet) handle(s os.Signal, arg interface{}) error {
 	if _, found := this.m[s]; found {
 		this.m[s](s, arg)
 		return nil

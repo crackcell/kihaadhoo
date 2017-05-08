@@ -23,6 +23,7 @@ import (
 	"os"
 	"testing"
 	"time"
+	"syscall"
 )
 
 //===================================================================
@@ -30,19 +31,19 @@ import (
 //===================================================================
 
 func TestEverything(t *testing.T) {
-	sset := SignalHandlerSet{}
+	sset := NewSignalHandlerSet()
 
 	handler := func(s os.Signal, arg interface{}) {
 		fmt.Printf("handle signal: %v\n", s)
-		if s == SIGTERM {
+		if s == syscall.SIGTERM {
 			fmt.Printf("signal terminate received, exited normally\n")
 			os.Exit(0)
 		}
 	}
-	sset.Register(SIGINT, handler)
-	sset.Register(SIGUSR1, handler)
-	sset.Register(SIGUSR2, handler)
-	sset.Register(SIGTERM, handler)
+	sset.Register(syscall.SIGINT, handler)
+	sset.Register(syscall.SIGUSR1, handler)
+	sset.Register(syscall.SIGUSR2, handler)
+	sset.Register(syscall.SIGTERM, handler)
 
 	sset.Start()
 
