@@ -30,7 +30,7 @@ import (
 
 func Init() (err error) {
 	log.SetFormatter(&log.JSONFormatter{})
-	lvl, err := log.ParseLevel(config.Conf.LogLevel)
+	lvl, err := log.ParseLevel(config.GlobalConfig.LogLevel)
 	if err != nil {
 		lvl = log.InfoLevel
 	}
